@@ -51,3 +51,9 @@ app.post('/login', async (req, res) => {
 
 - create session on login, store in db/redis/memory
 - allows you to remotely kill sessions if any issue
+
+### same origin policy & cookie vulnerabilities
+
+- session hijacking
+- css
+- csrf
