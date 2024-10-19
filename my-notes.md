@@ -46,3 +46,8 @@ app.post('/login', async (req, res) => {
 - cookieParser will sign the cookies, and browser will be able to read the cookies and know if their value was changed; we are sending 2 things: value of cookie and the proof that we know the secret
 - not all cookies should be signed, e.g. dark mode cookie etc., so they can be accessed from js
 - `req.cookie` vs `req.signedCookie`
+
+### creating sessions
+
+- create session on login, store in db/redis/memory
+- allows you to remotely kill sessions if any issue
