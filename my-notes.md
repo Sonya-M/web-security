@@ -57,3 +57,16 @@ app.post('/login', async (req, res) => {
 - session hijacking
 - css
 - csrf
+
+## Session Hijacking
+
+- privilege escalation
+- sql injection (to watch sql queries, run `npm start -- --sql`),
+
+```
+  ' OR 1=1--
+```
+
+```sql
+SQL SELECT * FROM users WHERE email = 'bobby@tables.com' AND password = '' OR 1=1--'
+```
