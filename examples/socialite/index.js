@@ -39,6 +39,11 @@ app.get('/profile', authenticate, async (req, res) => {
   res.render('profile', { title: 'Profile' });
 });
 
+// imagine this is a different site - cookie corresponding to site/action would be sent by browser on form submit
+app.get('/malicious', async (req, res) => {
+  res.render('malicious', { port: process.env.PORT, title: 'Malicious' })
+})
+
 // User login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
