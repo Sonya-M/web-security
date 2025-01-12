@@ -11,6 +11,11 @@ import { db } from '#shared/database.js';
  * @property {boolean} suspended
  * @property {string} createdAt
  * @property {string} updatedAt
+ * @property {string} token
+ * 
+ * @typedef {object} Session
+ * @property {number} userId
+ * @property {string} sessionId
  */
 
 await db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -34,5 +39,10 @@ await db.run(`CREATE TABLE IF NOT EXISTS posts (
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
     )`);
+
+// Create sessions table
+await db.run(
+    'CREATE TABLE IF NOT EXISTS sessions (sessionId TEXT PRIMARY KEY, userId INTEGER, token TEXT)'
+);
 
 export { db };

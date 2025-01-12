@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import { v4 as uuid } from 'uuid'
 import { startServer, createServer } from '#shared';
 
 import { db } from './database.js';
@@ -18,6 +20,8 @@ app.use(methodOverride);
 
 app.get('/', async (req, res) => {
   const limit = req.query.limit || 50;
+
+  console.log({ user: req.user })
 
   const posts = await db.all(
     'SELECT posts.*, users.username, users.photograph AS avatar FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.createdAt DESC LIMIT ?',
@@ -59,18 +63,33 @@ app.post('/login', async (req, res) => {
       .render('login', { error: 'Invalid login credentials.' });
   }
 
-  res.cookie('sessionId', user.id);
-  res.redirect('/');
+  const sessionId = crypto.randomBytes(16).toString('hex');
+  const token = uuid();
+
+  try {
+    await db.run(`INSERT INTO sessions (sessionId, userId, token) VALUES (?, ?, ?)`, [
+      sessionId,
+      user.id,
+      token
+    ])
+    res.cookie('sessionId', sessionId);
+    res.redirect('/');
+  } catch (e) {
+    console.error(e);
+
+  }
+
 });
 
 // User logout
-app.post('/logout', authenticate, (req, res) => {
+app.post('/logout', authenticate, async (req, res) => {
+  await db.run('DELETE FROM sessions WHERE sessionId = ?', req.cookies.sessionId);
   res.clearCookie('sessionId');
   res.redirect('/');
 });
 
 // User signup
-app.post('/account', async (req, res) => {
+app.post('/account', authenticate, async (req, res) => {
   const { username, password, passwordConfirmation } = req.body;
 
   if (password !== passwordConfirmation) {
@@ -87,7 +106,6 @@ app.post('/account', async (req, res) => {
 
     const user = await db.get('SELECT id FROM users WHERE id = ?', [lastID]);
 
-    res.cookie('sessionId', user.id);
     res.redirect('/');
   } catch (error) {
     console.error(error);
