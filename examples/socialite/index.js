@@ -21,14 +21,16 @@ app.use(methodOverride);
 app.get('/', async (req, res) => {
   const limit = req.query.limit || 50;
 
-  console.log({ user: req.user })
+  // @ts-ignore
+  console.log({ user: req.user, token: req.token })
 
   const posts = await db.all(
     'SELECT posts.*, users.username, users.photograph AS avatar FROM posts JOIN users ON posts.userId = users.id ORDER BY posts.createdAt DESC LIMIT ?',
     [limit]
   );
 
-  res.render('posts', { title: 'Home', posts });
+  // @ts-ignore
+  res.render('posts', { title: 'Home', posts, token: req.token });
 });
 
 app.get('/login', async (req, res) => {
@@ -83,13 +85,13 @@ app.post('/login', async (req, res) => {
 
 // User logout
 app.post('/logout', authenticate, async (req, res) => {
-  await db.run('DELETE FROM sessions WHERE sessionId = ?', req.cookies.sessionId);
+  await db.run('DELETE FROM sessions WHERE sessionId = ?', [req.cookies.sessionId]);
   res.clearCookie('sessionId');
   res.redirect('/');
 });
 
 // User signup
-app.post('/account', authenticate, async (req, res) => {
+app.post('/account', async (req, res) => {
   const { username, password, passwordConfirmation } = req.body;
 
   if (password !== passwordConfirmation) {
@@ -106,7 +108,7 @@ app.post('/account', authenticate, async (req, res) => {
 
     const user = await db.get('SELECT id FROM users WHERE id = ?', [lastID]);
 
-    res.redirect('/');
+    res.redirect('/login');
   } catch (error) {
     console.error(error);
 
@@ -159,7 +161,13 @@ app.get('/posts', async (req, res) => {
 
 // Create post
 app.post('/posts', authenticate, async (req, res) => {
-  const { content } = req.body;
+  const { content, _csrf } = req.body;
+
+
+  if (!_csrf) {
+    res.send('Unauthorized')
+    return;
+  }
 
   const { lastID } = await db.run(
     'INSERT INTO posts (userId, content) VALUES (?, ?)',

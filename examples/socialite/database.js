@@ -16,6 +16,7 @@ import { db } from '#shared/database.js';
  * @typedef {object} Session
  * @property {number} userId
  * @property {string} sessionId
+ * @property {string} token
  */
 
 await db.run(`CREATE TABLE IF NOT EXISTS users (

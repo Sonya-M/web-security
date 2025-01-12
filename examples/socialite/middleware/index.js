@@ -25,6 +25,8 @@ export const currentUser = async (req, res, next) => {
 
   if (user) {
     req.user = user;
+    // @ts-ignore
+    req.token = session?.token;
     res.locals.user = user;
   }
 
